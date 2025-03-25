@@ -12,6 +12,9 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 line_bot_api = LineBotApi(os.getenv('CHANNEL_ACCESS_TOKEN'))
 handler1 = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 
+# Initialize message counter
+message_counter = 0
+
 @app.route('/callback', methods=['POST'])
 def callback():
     signature = request.headers['X-Line-Signature']
@@ -37,7 +40,14 @@ def handle_message(event):
         ret = response['choices'][0]['message']['content'].strip()
     except:
         ret = '發生錯誤！'
+        
     line_bot_api.reply_message(event.reply_token,TextSendMessage(text=ret))
+    # Increment message counter
+    message_counter += 1
+    print(f"OpenAI has responded {message_counter} times so far.")  # Debugging message
+    
+    # Respond with the message and the counter value
+    line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f"{ret}\n\n累積訊息次數: {message_counter}"))
 
 if __name__ == '__main__':
     app.run()
