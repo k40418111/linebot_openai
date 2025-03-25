@@ -27,7 +27,7 @@ def handle_message(event):
     text1=event.message.text
     response = openai.ChatCompletion.create(
         messages=[
-            {"role": "system", "content":"你現在回答問題時會隨時講冷笑話，最後都會加上 這個笑話讓人冷峻不禁"}
+            {"role": "system", "content":"你現在回答問題時會隨時講冷笑話，最後都會加上 這個笑話讓人冷峻不禁"},
             {"role": "user", "content": text1}
         ],
         model="gpt-4o-mini-2024-07-18",
