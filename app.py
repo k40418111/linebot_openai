@@ -15,6 +15,22 @@ handler1 = WebhookHandler(os.getenv('CHANNEL_SECRET'))
 # Initialize message counter
 message_counter = 0
 
+# 讀取計數器的值
+def load_counter():
+    try:
+        with open('counter.txt', 'r') as f:
+            return int(f.read())
+    except FileNotFoundError:
+        return 0
+
+# 儲存計數器的值
+def save_counter(counter):
+    with open('counter.txt', 'w') as f:
+        f.write(str(counter))
+
+# 載入計數器
+message_counter = load_counter()
+
 @app.route('/callback', methods=['POST'])
 def callback():
     signature = request.headers['X-Line-Signature']
@@ -27,6 +43,7 @@ def callback():
 
 @handler1.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    global message_counter  # 告訴 Python 使用全域變數
     text1=event.message.text
     response = openai.ChatCompletion.create(
         messages=[
@@ -41,12 +58,12 @@ def handle_message(event):
     except:
         ret = '發生錯誤！'
         
-    line_bot_api.reply_message(event.reply_token,TextSendMessage(text=ret))
-    # Increment message counter
+    # 增加計數器
     message_counter += 1
-    print(f"OpenAI has responded {message_counter} times so far.")  # Debugging message
+    save_counter(message_counter)  # 儲存新的計數值
+    print(f"OpenAI 已回應 {message_counter} 次。")  # 調試訊息
     
-    # Respond with the message and the counter value
+    # 回覆訊息並包含計數
     line_bot_api.reply_message(event.reply_token, TextSendMessage(text=f"{ret}\n\n累積訊息次數: {message_counter}"))
 
 if __name__ == '__main__':
